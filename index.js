@@ -66,11 +66,11 @@ app.post('/api/users/:_id/exercises', async (req, res) => {
       
       await exercise.save();
       res.json({ 
+          _id: userId, 
           username: (await User.findById(userId)).username, 
           description: exercise.description, 
           duration: exercise.duration, 
-          date: exercise.date,
-          _id: userId
+          date: exercise.date 
       });
   } catch (error) {
       res.status(500).json({ error: error.message });
