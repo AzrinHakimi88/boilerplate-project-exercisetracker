@@ -66,11 +66,12 @@ app.post('/api/users/:_id/exercises', async (req, res) => {
       
       await exercise.save();
       res.json({ 
-          _id: userId, 
+          
           username: (await User.findById(userId)).username, 
           description: exercise.description, 
           duration: exercise.duration, 
-          date: exercise.date 
+          date: exercise.date ,
+          _id: userId, 
       });
   } catch (error) {
       res.status(500).json({ error: error.message });
@@ -110,7 +111,7 @@ app.get('/api/users/:_id/logs', async (req, res) => {
           log: exercises.map(exercise => ({
               description: exercise.description,
               duration: exercise.duration,
-              date: exercise.date.toDateString()// Format date as a string
+              date: exercise.date.toLocaleDateString('en-us', { weekday:"long", year:"numeric", month:"short", day:"numeric"}) // Format date as a string
           }))
       });
   } catch (error) {
