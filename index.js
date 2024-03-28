@@ -59,8 +59,11 @@ app.post('/api/users/:_id/exercises', async (req, res) => {
   try {
       let { description, duration, date } = req.body;
       if(!date){
-        date = new Date(Date.now()).toDateString();
-        
+        currentdate = new Date(Date.now());
+        date = currentdate.toDateString();
+      }
+      else{
+        date = date.toDateString();
       }
       const userId = req.params._id;
       const exercise = new Exercise({ userId, description, duration, date });
@@ -107,7 +110,7 @@ app.get('/api/users/:_id/logs', async (req, res) => {
       const log = exercises.map((exercise) =>(
              { description: exercise.description,
               duration: exercise.duration,
-              date: exercise.date.toDateString()
+              date: exercise.date
             }
       )) 
 
