@@ -29,6 +29,7 @@ const exerciseSchema = mongoose.Schema({
     description: {type:String, required : true},
     duration: {type:Number, required : true},
     date : Date,
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 })
 
 const exerciseModel = mongoose.model('Exercise', exerciseSchema)
@@ -68,15 +69,22 @@ app.post('/api/users/:_id/exercises',async (req,res) => {
           description :description,
           duration : duration,
           date : date,
-
+          _id : userId
         }
         const result = await exerciseModel.create(data)
         if(result){
-          res.json(data)
+          res.json({ 
+            _id: userId, 
+            username: user.username, 
+            description: exercise.description, 
+            duration: duration, 
+            date: date 
+        });
         }
       }
   }catch(err){
     console.log(err)
+    
   }
 })
 
