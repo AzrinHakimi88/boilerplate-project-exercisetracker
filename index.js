@@ -57,13 +57,10 @@ app.get('/api/users', async (req, res) => {
 // Add exercise for a user
 app.post('/api/users/:_id/exercises', async (req, res) => {
   try {
-      const { description, duration, date } = req.body;
-      let formatDate;
+      let { description, duration, date } = req.body;
       if(!date){
-        formatDate = new Date(Date.now()).toDateString('YYYY-MM-DD');
-      }
-      else{
-        formatDate = new Date(date).toDateString()
+        date = new Date(Date.now()).toDateString('YYYY-MM-DD');
+        
       }
       const userId = req.params._id;
       const exercise = new Exercise({ userId, description, duration, date });
