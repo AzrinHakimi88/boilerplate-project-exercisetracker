@@ -104,14 +104,13 @@ app.get('/api/users/:_id/logs', async (req, res) => {
       let exercisesQuery = Exercise.find(query).limit(limit ? parseInt(limit) : undefined);
       const exercises = await exercisesQuery.exec();
 
-      const log = exercises.map((exercise) =>(
-             { description: exercise.description,
-              duration: exercise.duration,
-              date: exercise.date.toDateString()}
-      )) 
+      const log = exercises.map((exercise) => ({
+          description: exercise.description,
+          duration: exercise.duration,
+          date: exercise.date.toISOString().split('T')[0] // Format date as "YYYY-MM-DD"
+      }));
 
       res.json({ 
-          
           username: user.username, 
           count: exercises.length, 
           _id: user._id, 
@@ -121,6 +120,7 @@ app.get('/api/users/:_id/logs', async (req, res) => {
       res.status(500).json({ error: error.message });
   }
 });
+
 
 
 
