@@ -24,7 +24,7 @@ const exerciseSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   description: String,
   duration: Number,
-  date: { type: String }
+  date: { type: Date }
 });
 
 // Define MongoDB Models
@@ -70,7 +70,7 @@ app.post('/api/users/:_id/exercises', async (req, res) => {
           username: (await User.findById(userId)).username, 
           description: exercise.description, 
           duration: exercise.duration, 
-          date: exercise.date ,
+          date: exercise.date.toDateString() ,
           _id: userId, 
       });
   } catch (error) {
@@ -107,7 +107,7 @@ app.get('/api/users/:_id/logs', async (req, res) => {
       const log = exercises.map((exercise) =>(
              { description: exercise.description,
               duration: exercise.duration,
-              date: exercise.date}
+              date: new Date(exercise.date).toDateString()}
       )) 
 
       res.json({ 
