@@ -111,7 +111,7 @@ app.get('/api/users/:_id/logs', async (req, res) => {
           log: exercises.map(exercise => ({
               description: exercise.description,
               duration: exercise.duration,
-              date: exercise.date.toLocaleDateString('en-us', { weekday:"long", year:"numeric", month:"short", day:"numeric"}) // Format date as a string
+              date: exercise.date.toDateString('YYYY-MM-DD')
           }))
       });
   } catch (error) {
