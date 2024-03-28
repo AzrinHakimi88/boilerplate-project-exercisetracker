@@ -78,7 +78,7 @@ app.post('/api/users/:_id/exercises', async (req, res) => {
   }
 });
 
-// Get full exercise log of a user with optional parameters
+// Get full exercise log of a user
 app.get('/api/users/:_id/logs', async (req, res) => {
   try {
       const userId = req.params._id;
@@ -105,20 +105,20 @@ app.get('/api/users/:_id/logs', async (req, res) => {
       const exercises = await exercisesQuery.exec();
 
       res.json({ 
+          
           username: user.username, 
           count: exercises.length, 
           _id: user._id, 
           log: exercises.map(exercise => ({
               description: exercise.description,
               duration: exercise.duration,
-              date: exercise.date.toString()
+              date: exercise.date.toDateString() // Format date as a string using toDateString()
           }))
       });
   } catch (error) {
       res.status(500).json({ error: error.message });
   }
 });
-
 
 
 
