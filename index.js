@@ -104,16 +104,19 @@ app.get('/api/users/:_id/logs', async (req, res) => {
       let exercisesQuery = Exercise.find(query).limit(limit ? parseInt(limit) : undefined);
       const exercises = await exercisesQuery.exec();
 
+      const log = exercises.map((exercise) =>(
+             { description: exercise.description,
+              duration: exercise.duration,
+              date: exercise.date.toDateString()
+            }
+      )) 
+
       res.json({ 
           
           username: user.username, 
           count: exercises.length, 
           _id: user._id, 
-          log: exercises.map(exercise => ({
-              description: exercise.description,
-              duration: exercise.duration,
-              date: exercise.date.toDateString() // Format date as a string using toDateString()
-          }))
+          log: log
       });
   } catch (error) {
       res.status(500).json({ error: error.message });
