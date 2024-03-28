@@ -24,6 +24,15 @@ const userSchema = mongoose.Schema({
 
 const userModel = mongoose.model('User', userSchema )
 
+const exerciseSchema = mongoose.Schema({
+    username : {type:String, required : true},
+    description: {type:String, required : true},
+    duration: {type:Number, required : true},
+    date : Date,
+})
+
+const exerciseModel = mongoose.model('Exercise', exerciseSchema)
+
 app.post('/api/users',async (req,res) => {
     const {username} = req.body
     console.log(username)
@@ -40,6 +49,32 @@ app.get('/api/users',async (req,res) => {
   try{
     const user = await userModel.find()
     res.json(user)
+  }catch(err){
+    console.log(err)
+  }
+})
+
+app.post('/api/users/:_id/exercises',async (req,res) => {
+  let {description,duration,date} = req.body
+  const userId = req.params._id
+  try{
+      const user = await userModel.findById(userId)
+      if(user){
+        if(!date){
+          date = new Date(Date.now())
+        }
+        const data = {
+          username: user.username,
+          description :description,
+          duration : duration,
+          date : date,
+
+        }
+        const result = await exerciseModel.create(data)
+        if(result){
+          res.json(data)
+        }
+      }
   }catch(err){
     console.log(err)
   }
