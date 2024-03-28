@@ -66,23 +66,43 @@ app.post('/api/users/:_id/exercises', async (req, res) => {
       
       await exercise.save();
       res.json({ 
-          _id: userId, 
           username: (await User.findById(userId)).username, 
           description: exercise.description, 
           duration: exercise.duration, 
-          date: exercise.date 
+          date: exercise.date,
+          _id: userId
       });
   } catch (error) {
       res.status(500).json({ error: error.message });
   }
 });
 
-// Get full exercise log of a user
+// Get full exercise log of a user with optional parameters
 app.get('/api/users/:_id/logs', async (req, res) => {
   try {
       const userId = req.params._id;
-      const exercises = await Exercise.find({ userId });
+      let { from, to, limit } = req.query;
+
       const user = await User.findById(userId);
+      if (!user) {
+          return res.status(404).json({ error: 'User not found' });
+      }
+
+      let query = { userId };
+
+      if (from || to) {
+          query.date = {};
+          if (from) {
+              query.date.$gte = new Date(from);
+          }
+          if (to) {
+              query.date.$lte = new Date(to);
+          }
+      }
+
+      let exercisesQuery = Exercise.find(query).limit(limit ? parseInt(limit) : undefined);
+      const exercises = await exercisesQuery.exec();
+
       res.json({ 
           _id: user._id, 
           username: user.username, 
@@ -97,6 +117,7 @@ app.get('/api/users/:_id/logs', async (req, res) => {
       res.status(500).json({ error: error.message });
   }
 });
+
 
 
 
