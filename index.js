@@ -15,78 +15,88 @@ app.use(express.urlencoded({ extended: true }));
 
 mongoose.connect('mongodb://localhost:27017/Exercise').then(() => {console.log('connect to database')})
 
-const userSchema = mongoose.Schema({
-  username : {
-    type : String,
-    required : true
-  }
-})
-
-const userModel = mongoose.model('User', userSchema )
-
-const exerciseSchema = mongoose.Schema({
-    username : {type:String, required : true},
-    description: {type:String, required : true},
-    duration: {type:Number, required : true},
-    date : Date,
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-})
-
-const exerciseModel = mongoose.model('Exercise', exerciseSchema)
-
-app.post('/api/users',async (req,res) => {
-    const {username} = req.body
-    console.log(username)
-    try{
-      const user = await userModel.create({username: username})
-      res.json({username: user.username, _id : user._id})
-    }
-    catch(err){
-      console.log(err)
-    }
+// Define MongoDB Schemas
+const userSchema = new mongoose.Schema({
+  username: String,
 });
 
-app.get('/api/users',async (req,res) => {
-  try{
-    const user = await userModel.find()
-    res.json(user)
-  }catch(err){
-    console.log(err)
-  }
-})
+const exerciseSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  description: String,
+  duration: Number,
+  date: { type: Date, default: Date.now }
+});
 
-app.post('/api/users/:_id/exercises',async (req,res) => {
-  let {description,duration,date} = req.body
-  const userId = req.params._id
-  try{
-      const user = await userModel.findById(userId)
-      if(user){
-        if(!date){
-          date = new Date(Date.now())
-        }
-        const data = {
-          username: user.username,
-          description :description,
-          duration : duration,
-          date : date,
-          _id : userId
-        }
-        const result = await exerciseModel.create(data)
-        if(result){
-          res.json({ 
-            _id: userId, 
-            username: user.username, 
-            description: exercise.description, 
-            duration: duration, 
-            date: date 
-        });
-        }
-      }
-  }catch(err){
-    console.log(err)
-    
+// Define MongoDB Models
+const User = mongoose.model('User', userSchema);
+const Exercise = mongoose.model('Exercise', exerciseSchema);
+
+// Routes
+// Create a new user
+app.post('/api/users', async (req, res) => {
+  try {
+      const { username } = req.body;
+      const user = new User({ username });
+      await user.save();
+      res.json({ username: user.username, _id: user._id });
+  } catch (error) {
+      res.status(500).json({ error: error.message });
   }
-})
+});
+
+// Get all users
+app.get('/api/users', async (req, res) => {
+  try {
+      const users = await User.find();
+      res.json(users);
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+});
+
+// Add exercise for a user
+app.post('/api/users/:_id/exercises', async (req, res) => {
+  try {
+      let { description, duration, date } = req.body;
+      if(!date){
+        date = new Date(Date.now());
+      }
+      const userId = req.params._id;
+      const exercise = new Exercise({ userId, description, duration, date });
+      
+      await exercise.save();
+      res.json({ 
+          _id: userId, 
+          username: (await User.findById(userId)).username, 
+          description: exercise.description, 
+          duration: exercise.duration, 
+          date: exercise.date 
+      });
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+});
+
+// Get full exercise log of a user
+app.get('/api/users/:_id/logs', async (req, res) => {
+  try {
+      const userId = req.params._id;
+      const exercises = await Exercise.find({ userId });
+      const user = await User.findById(userId);
+      res.json({ 
+          _id: user._id, 
+          username: user.username, 
+          count: exercises.length, 
+          log: exercises.map(exercise => ({
+              description: exercise.description,
+              duration: exercise.duration,
+              date: exercise.date.toDateString() // Format date as a string
+          }))
+      });
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+});
 
 
 
