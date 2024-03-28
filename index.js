@@ -58,32 +58,25 @@ app.get('/api/users', async (req, res) => {
 app.post('/api/users/:_id/exercises', async (req, res) => {
   try {
       let { description, duration, date } = req.body;
-      const userId = req.params._id;
-      
       if(!date){
         date = new Date(Date.now());
       }
-      // Create the exercise
+      const userId = req.params._id;
       const exercise = new Exercise({ userId, description, duration, date });
+      
       await exercise.save();
-      
-      // Fetch the user object and update it with the new exercise
-      let user = await User.findById(userId);
-      if (!user) {
-          return res.status(404).json({ error: 'User not found' });
-      }
-      
-      // Add the new exercise to the user's exercise log
-      user.exercises.push(exercise);
-      await user.save();
-      
-      // Send the updated user object with the new exercise
-      res.json(user);
+      res.json({ 
+          
+          username: (await User.findById(userId)).username, 
+          description: exercise.description, 
+          duration: exercise.duration, 
+          date: exercise.date ,
+          _id: userId, 
+      });
   } catch (error) {
       res.status(500).json({ error: error.message });
   }
 });
-
 
 // Get full exercise log of a user with optional parameters
 app.get('/api/users/:_id/logs', async (req, res) => {
