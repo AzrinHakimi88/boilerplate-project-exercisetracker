@@ -110,7 +110,7 @@ app.get('/api/users/:_id/logs', async (req, res) => {
           log: exercises.map(exercise => ({
               description: exercise.description,
               duration: exercise.duration,
-              date: exercise.date.toDateString() // Format date as a string
+              date: exercise.date.toDateString()// Format date as a string
           }))
       });
   } catch (error) {
