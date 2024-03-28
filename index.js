@@ -24,7 +24,7 @@ const exerciseSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   description: String,
   duration: Number,
-  date: { type: Date, default: Date.now }
+  date: { type: Date }
 });
 
 // Define MongoDB Models
@@ -59,18 +59,18 @@ app.post('/api/users/:_id/exercises', async (req, res) => {
   try {
       let { description, duration, date } = req.body;
       if(!date){
-        date = new Date(Date.now());
+        date = new Date(Date.now()).toDateString();
+        
       }
       const userId = req.params._id;
       const exercise = new Exercise({ userId, description, duration, date });
       
       await exercise.save();
       res.json({ 
-          
           username: (await User.findById(userId)).username, 
           description: exercise.description, 
           duration: exercise.duration, 
-          date: exercise.date ,
+          date: exercise.date.toDateString() ,
           _id: userId, 
       });
   } catch (error) {
